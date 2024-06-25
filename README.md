@@ -8,7 +8,7 @@
 
 ## Jane Street Puzzle June 2024
 
-<img src="https://raw.githubusercontent.com/andrew-drogalis/Altered-States-2/main/assets/june-2024.png" alt="Puzzle Image"> 
+<img src="https://raw.githubusercontent.com/andrew-drogalis/Altered-States-2/main/assets/june-2024.png" alt="Puzzle Image" style="width: 60%; margin-left: auto; margin-right: auto;"> 
 
 A little while ago we asked solvers to smoosh as many of the 50 U.S. states into a 5-by-5 grid as possible.
 
