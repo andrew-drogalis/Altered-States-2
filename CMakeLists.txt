@@ -16,7 +16,6 @@ target_include_directories(${PROJECT_NAME}
 # Build Configuration
 include(cmake/CompilerWarnings.cmake)
 include(cmake/Sanitizers.cmake)
-include(cmake/StaticAnalyzers.cmake)
 
 myproject_set_project_warnings(${PROJECT_NAME} TRUE "X" "" "" "X")
 
@@ -29,4 +28,3 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     gcc_analyzer_enable()
     myproject_enable_sanitizers(${PROJECT_NAME} TRUE TRUE TRUE FALSE TRUE)
 endif()
-
