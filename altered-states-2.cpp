@@ -13,32 +13,42 @@
 constexpr int matrixSize {5};
 constexpr int numChars {26};
 
-constexpr void charScore()
+void getConnectionScores()
 {
-    std::array<double, numChars> charScoreArr;
-    std::array<int, numChars> letterCount;
-    std::array<std::array<double, numChars>, numChars> charAdjacencyScoreForward;
-    std::array<std::array<int, numChars>, numChars> charAdjacencyCountForward;
-    std::array<std::array<double, numChars>, numChars> charAdjacencyScoreReverse;
-    std::array<std::array<int, numChars>, numChars> charAdjacencyCountReverse;
+    std::array<std::pair<std::string, double>, numStates> stateAlteredScore {};
+    std::array<std::array<double, numChars>, numChars> charAdjacencyScore {};
+    std::array<std::array<int, numChars>, numChars> charAdjacencyCount {};
+    int i {};
 
     for (auto [state, population] : statesPopulation)
     {
+        stateAlteredScore[i] = std::make_pair(state, 0.0);
         double populationPerChar = population / static_cast<double>(state.length());
         char lastChar            = ' ';
         for (char ch : state)
         {
             int index = ch - 'a';
-            letterCount[index]++;
-            charScoreArr[index] += populationPerChar;
             if (lastChar != ' ')
             {
-                charAdjacencyCountForward[lastChar - 'a'][index]++;
-                charAdjacencyScoreForward[lastChar - 'a'][index] += populationPerChar;
-                charAdjacencyCountReverse[index][lastChar - 'a']++;
-                charAdjacencyScoreReverse[index][lastChar - 'a'] += populationPerChar;
+                charAdjacencyCount[lastChar - 'a'][index]++;
+                charAdjacencyScore[lastChar - 'a'][index] += populationPerChar;
             }
             lastChar = ch;
+        }
+        ++i;
+    }
+
+    std::array<int, numChars> numOfConnections {};
+    std::array<double, numChars> connectionsScore {};
+    for (int i {}; i < numChars; ++i)
+    {
+        for (int j {}; j < numChars; ++j)
+        {
+            if (charAdjacencyCount[i][j])
+            {
+                numOfConnections[i]++;
+                connectionsScore[i] += charAdjacencyScore[i][j];
+            }
         }
     }
 }
@@ -46,7 +56,7 @@ constexpr void charScore()
 int saveToJSON(std::string const& resultsMatrixStr)
 {
     // Save results to file for export to Jane Street for judging
-    std::ofstream saveMatrix {"json/result-matrix.json"};
+    std::ofstream saveMatrix {"json/result-matrix.txt"};
     if (saveMatrix.is_open())
     {
         saveMatrix << resultsMatrixStr;
@@ -66,7 +76,7 @@ int saveToJSON(std::string const& resultsMatrixStr)
 
 int main()
 {
-    //
+    getConnectionScores();
     std::array<std::array<char, matrixSize>, matrixSize> resultsMatrix = {{'a'}};
 
     std::string resultsMatrixStr;
