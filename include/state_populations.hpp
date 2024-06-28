@@ -6,6 +6,9 @@
 #include <array>
 #include <string_view>
 
+namespace alteredstates
+{
+
 inline constexpr int numStates {50};
 
 using namespace std::literals::string_view_literals;
@@ -63,4 +66,5 @@ inline constexpr std::array<std::pair<std::string_view, int>, numStates> statesP
     {"wyoming"sv, 576'851},
 }};
 
+}// namespace alteredstates
 #endif
