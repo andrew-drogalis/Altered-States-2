@@ -1,13 +1,14 @@
 // Copyright 2024 Andrew Drogalis
 // GNU License
-#include <algorithm>
 #include <array>
+#include <cmath>
 #include <fstream>
 #include <iostream>
-#include <limits>
 #include <string>
-#include <string_view>
-#include <vector>
+#include <utility>
+
+#include <functional>
+#include <unordered_set>
 
 #include "state-populations.h"
 // inline constexpr int numStates defined in "state-populations"
@@ -19,33 +20,24 @@ constexpr int numChars {26};
 
 struct Solution
 {
-    std::array<std::array<char, matrixSize>, matrixSize> resultMatrix {};
-    std::array<int, numChars> numOfUniqueConnections {};
-    std::array<double, numChars> connectionsScore {};
-    std::array<int, numChars> totalCount {};
+    std::string resultMatrix;
+    int maxScore {};
 
-    Solution()
+    void getLetterOccurrences()
     {
-        getConnectionScores();
-        findBestFitStates();
-    }
-
-    void getConnectionScores()
-    {
-
-        std::array<std::array<double, numChars>, numChars> charAdjacencyScore {};
+        std::array<std::pair<char, double>, numChars> charOccurrence {};
+        double const THRESHOLD = 7.0;
+        std::array<int, numChars> numOfUniqueConnections {};
         std::array<std::array<int, numChars>, numChars> charAdjacencyCount {};
         for (auto const& [state, population] : statesPopulation)
         {
-            double populationPerChar = population / static_cast<double>(state.length());
-            char lastChar            = ' ';
+            char lastChar = ' ';
             for (char ch : state)
             {
                 int index = ch - 'a';
                 if (lastChar != ' ')
                 {
                     charAdjacencyCount[lastChar - 'a'][index]++;
-                    charAdjacencyScore[lastChar - 'a'][index] += populationPerChar;
                 }
                 lastChar = ch;
             }
@@ -58,43 +50,96 @@ struct Solution
                 if (charAdjacencyCount[i][j])
                 {
                     numOfUniqueConnections[i]++;
-                    connectionsScore[i] += charAdjacencyScore[i][j];
-                    totalCount[i] += charAdjacencyCount[i][j];
                 }
             }
+            charOccurrence[i] = std::make_pair('a' + i, numOfUniqueConnections[i] / THRESHOLD);
         }
-    }
 
-    void findBestFitStates()
-    {
-        auto comp = [](std::pair<std::string_view, double> A, std::pair<std::string_view, double> B) {
-            return A.second < B.second;
-        };
-        std::vector<std::pair<std::string_view, double>> stateAlteredScore;
+        auto comp = [](std::pair<char, double> A, std::pair<char, double> B) { return A.second < B.second; };
 
-        for (auto const& [state, population] : statesPopulation)
+        std::sort(charOccurrence.rbegin(), charOccurrence.rend(), comp);
+
+        for (auto const& [ch, occurrence] : charOccurrence)
         {
-            double alteredStateZScore {};
-            double minValue = std::numeric_limits<double>::max();
-            for (char ch : state)
+            int count = std::round(occurrence);
+            if (ch == 'e')
             {
-                alteredStateZScore += connectionsScore[ch - 'a'];
-                minValue = std::min(minValue, connectionsScore[ch = 'a']);
+                ++count;
             }
-            alteredStateZScore -= minValue;
-            double wordMeanZScore = alteredStateZScore / static_cast<double>(state.length() - 1);
-
-            stateAlteredScore.emplace_back(state, wordMeanZScore);
+            for (int i {}; i < count; ++i) { resultMatrix.push_back(ch); }
         }
-        std::sort(stateAlteredScore.rbegin(), stateAlteredScore.rend(), comp);
-
-        for (auto [state, zscore] : stateAlteredScore) { std::cout << state << " " << zscore << '\n'; }
     }
 
-    [[nodiscard]] std::array<std::array<char, matrixSize>, matrixSize> returnResult() const noexcept
+    int calculateScore()
     {
-        return resultMatrix;
+        std::unordered_set<std::string_view> statesVisited;
+        int totalScore {};
+        // All 8 Directions for Kings moves in chess
+        int const numOfDirections {8};
+        std::array<int, numOfDirections + 1> directions = {1, 0, -1, 0, 1, 1, -1, -1, 1};
+
+        // Recursive Matrix Navigation
+        std::function<void(int, int, int, int, std::array<int, numStates>)> searchMatrix =
+            [&](int index, int row, int col, int level, std::array<int, numStates> errorCharCount) {
+                int i {};
+                bool breakOut = true;
+                for (auto const& [state, population] : statesPopulation)
+                {
+                    int lenStateWord = state.length();
+                    if (level < lenStateWord && state[level] != resultMatrix[index])
+                    {
+                        errorCharCount[i]++;
+                    }
+                    if (level >= lenStateWord)
+                    {
+                        errorCharCount[i]++;
+                    }
+                    // Store the result
+                    if (level == lenStateWord - 1 && errorCharCount[i] <= 1 && ! statesVisited.contains(state))
+                    {
+                        totalScore += population;
+                        statesVisited.insert(state);
+                    }
+                    // If we still have a chance then continue the search
+                    if (errorCharCount[i] <= 1)
+                    {
+                        breakOut = false;
+                    }
+                    ++i;
+                }
+                if (breakOut)
+                {
+                    return;
+                }
+
+                for (int i {}; i < numOfDirections; ++i)
+                {
+                    int nextRow = row + directions[i];
+                    int nextCol = col + directions[i + 1];
+                    if (nextRow >= 0 && nextCol >= 0 && nextRow < matrixSize && nextCol < matrixSize)
+                    {
+                        int index = matrixSize * nextRow + nextCol;
+                        searchMatrix(index, nextRow, nextCol, level + 1, errorCharCount);
+                    }
+                }
+            };
+
+        // Search through all points in the matrix
+        for (int row {}; row < matrixSize; ++row)
+        {
+            for (int col {}; col < matrixSize; ++col)
+            {
+                int index = matrixSize * row + col;
+                std::array<int, numStates> errorCharCount {};
+                searchMatrix(index, row, col, 0, errorCharCount);
+            }
+        }
+        return totalScore;
     }
+
+    void test() {}
+
+    [[nodiscard]] std::string returnResult() const noexcept { return resultMatrix; }
 };
 
 int saveToJSON(std::string const& resultsMatrixStr)
@@ -121,12 +166,8 @@ int saveToJSON(std::string const& resultsMatrixStr)
 int main()
 {
     Solution solution;
-    std::array<std::array<char, matrixSize>, matrixSize> resultsMatrix = solution.returnResult();
+    solution.getLetterOccurrences();
+    auto resultsMatrix = solution.returnResult();
 
-    std::string resultsMatrixStr;
-    for (auto row : resultsMatrix)
-    {
-        for (auto col : row) { resultsMatrixStr.push_back(col); }
-    }
-    return saveToJSON(resultsMatrixStr);
+    return saveToJSON(resultsMatrix);
 }
