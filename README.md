@@ -3,12 +3,14 @@
 ## Table of Contents
 
 - [Jane Street Puzzle June 2024](#Jane-Street-Puzzle-June-2024)
-- [Solution Description](#Solution-Description)
+- [Solution](#Solution)
 - [License](#License)
 
 ## Jane Street Puzzle June 2024
 
-<img src="https://raw.githubusercontent.com/andrew-drogalis/Altered-States-2/main/assets/june-2024.png" alt="Puzzle Image" style="width: 60%; margin-left: auto; margin-right: auto;"> 
+<img src="https://raw.githubusercontent.com/andrew-drogalis/Altered-States-2/main/assets/june-2024.png" alt="Puzzle Image" style="width: 60%; margin-left: auto; margin-right: auto;">
+
+#### Description
 
 A little while ago we asked solvers to smoosh as many of the 50 U.S. states into a 5-by-5 grid as possible.
 
@@ -35,9 +37,42 @@ Beyond that requirement, the local tourism authority has established awards for 
 - NOCAL: avoids California
 - C2C: contains a coast-to-coast1 chain
 
-1) “Coast-to-coast” means “East coast to West coast”. States in the chain must have positive joint border length (e.g. Arizona-to-Colorado would not count as a “step” in the chain); “East coast” states range from Florida (southernmost) to Maine (northernmost). ↩
+1. “Coast-to-coast” means “East coast to West coast”. States in the chain must have positive joint border length (e.g. Arizona-to-Colorado would not count as a “step” in the chain); “East coast” states range from Florida (southernmost) to Maine (northernmost). ↩
 
-## Solution Description
+## Solution
+
+<img src="https://raw.githubusercontent.com/andrew-drogalis/Altered-States-2/main/assets/june-solution-2024.png" alt="Puzzle Image" style="width: 60%; margin-left: auto; margin-right: auto;">
+
+#### Total Score
+
+```txt
+Population: 202,802,988
+```
+
+#### States Solution
+
+```txt
+alabama
+newyork
+newjersey
+georgia
+nevada
+california
+michigan
+ohio
+oregon
+indiana
+idaho
+kansas
+illinois
+wyoming
+iowa
+florida
+virginia
+maine
+texas
+```
+
 
 ## License
 
