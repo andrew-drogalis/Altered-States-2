@@ -1,6 +1,6 @@
 // Copyright 2024 Andrew Drogalis
 // GNU License
-#include "find_best_result.hpp"
+#include "optimize-matrix.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -8,6 +8,7 @@
 #include <functional>
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <unordered_set>
 
 #include "state_populations.hpp"
@@ -18,12 +19,10 @@
 namespace alteredstates
 {
 
+constexpr int numChars {26};
 constexpr int minThreshold {165'379'868};
 
-Optimizer::Optimizer(std::string& innerMatrix, std::string& outerMatrix)
-    : innerMatrix(innerMatrix), outerMatrix(outerMatrix)
-{
-}
+Optimizer::Optimizer(std::string& defaultMatrix) : defaultMatrix(defaultMatrix) {}
 
 int Optimizer::calculateScore(int matrixSize, std::string const& resultsMatrixStr)
 {
@@ -93,81 +92,89 @@ int Optimizer::calculateScore(int matrixSize, std::string const& resultsMatrixSt
 
 void Optimizer::maximizeScore()
 {
-    int totalLength      = innerMatrix.length() + outerMatrix.length();
+    int totalLength      = defaultMatrix.length();
     int const matrixSize = std::sqrt(totalLength);
     assert(totalLength == matrixSize * matrixSize);
 
     int maxScore {};
-    do {
-        statesVisited = {};
-        std::string newMatrix;
-        int innerPointer {};
-        int outerPointer {};
-        for (int i {}; i < matrixSize; ++i)
+    std::unordered_set<std::string_view> maxStatesVisited;
+    // Switch and / or Alter Two Positions
+    for (int strIndex1 {}; strIndex1 < totalLength; ++strIndex1)
+    {
+        for (int chIndex {}; chIndex < numChars; ++chIndex)
         {
-            for (int j {}; j < matrixSize; ++j)
+            // Letter "Q" Not in Any US State
+            if (chIndex == 'q' - 'a')
             {
-                if (i != 0 && i != matrixSize - 1 && j != 0 && j != matrixSize - 1)
+                ++chIndex;
+            }
+            for (int strIndex2 {strIndex1 + 1}; strIndex2 < totalLength; ++strIndex2)
+            {
+                for (int chIndex2 {}; chIndex2 < numChars; ++chIndex2)
                 {
-                    newMatrix.push_back(innerMatrix[innerPointer]);
-                    ++innerPointer;
-                }
-                else
-                {
-                    newMatrix.push_back(outerMatrix[outerPointer]);
-                    ++outerPointer;
+                    if (chIndex2 == 'q' - 'a')
+                    {
+                        ++chIndex2;
+                    }
+                    std::string newMatrix = defaultMatrix;
+                    newMatrix[strIndex1]  = static_cast<char>('a' + chIndex);
+                    newMatrix[strIndex2]  = static_cast<char>('a' + chIndex2);
+
+                    statesVisited  = {};
+                    int totalScore = calculateScore(matrixSize, newMatrix);
+
+                    if (totalScore > maxScore)
+                    {
+                        maxScore         = totalScore;
+                        maxStatesVisited = statesVisited;
+                        resultMatrix     = newMatrix;
+                    }
                 }
             }
         }
-
-        int totalScore = calculateScore(matrixSize, newMatrix);
-
-        maxScore = std::max(maxScore, totalScore);
-        if (totalScore >= minThreshold)
+    }
+    if (maxScore >= minThreshold)
+    {
+        std::cout << "Congratulations! Your Score of " << maxScore << " Passed!\n";
+        // Extra Achievements
+        if (maxScore >= 200'000'000)
         {
-            // std::cout << "Congratulations! Your Score of " << totalScore << " Passed!\n";
-            // // Extra Achievements
-            // if (totalScore >= 200'000'000)
-            // {
-            //     std::cout << "Awarded 200 Million Achievement!";
-            // }
-            // if (! statesVisited.contains("california"))
-            // {
-            //     std::cout << "Awarded 'No California' Achievement!";
-            // }
-            // if (statesVisited.contains("pennsylvania"))
-            // {
-            //     std::cout << "Awarded 'Visited Pennsylvania' Achievement!";
-            // }
-            // if (statesVisited.size() >= 20)
-            // {
-            //     std::cout << "Awarded 'Visited 20 States' Achievement!";
-            // }
-            // if (statesVisited.contains("colorado") && statesVisited.contains("utah") &&
-            // statesVisited.contains("arizona") &&
-            //     statesVisited.contains("newmexico"))
-            // {
-            //     std::cout << "Awarded 'Visited All 4 Corner States' Achievement!";
-            // }
-            // int mCount {};
-            // for (auto const& state : statesVisited)
-            // {
-            //     if (state[0] == 'm')
-            //     {
-            //         ++mCount;
-            //     }
-            // }
-            // if (mCount == 8)
-            // {
-            //     std::cout << "Awarded 'Visited All M States' Achievement!";
-            // }
+            std::cout << "Awarded 200 Million Achievement!\n";
         }
-        else
+        if (! maxStatesVisited.contains("california"))
         {
-            // std::cout << "Your score of " << totalScore << " Didn't pass";
+            std::cout << "Awarded 'No California' Achievement!\n";
         }
-    } while (std::next_permutation(innerMatrix.begin(), innerMatrix.end()));
-    std::cout << maxScore;
+        if (maxStatesVisited.contains("pennsylvania"))
+        {
+            std::cout << "Awarded 'Visited Pennsylvania' Achievement!\n";
+        }
+        if (maxStatesVisited.size() >= 20)
+        {
+            std::cout << "Awarded 'Visited 20 States' Achievement!\n";
+        }
+        if (maxStatesVisited.contains("colorado") && maxStatesVisited.contains("utah") &&
+            maxStatesVisited.contains("arizona") && maxStatesVisited.contains("newmexico"))
+        {
+            std::cout << "Awarded 'Visited All 4 Corner States' Achievement\n!";
+        }
+        int mCount {};
+        for (auto const& state : maxStatesVisited)
+        {
+            if (state[0] == 'm')
+            {
+                ++mCount;
+            }
+        }
+        if (mCount == 8)
+        {
+            std::cout << "Awarded 'Visited All M States' Achievement!\n";
+        }
+    }
+    else
+    {
+        std::cout << "Your score of " << maxScore << " Didn't pass\n";
+    }
 }
 
 std::string Optimizer::returnResultMatrix() const noexcept { return resultMatrix; }

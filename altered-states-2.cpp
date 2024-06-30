@@ -4,8 +4,8 @@
 #include <iostream>
 #include <string>
 
-#include "find_best_result.hpp"
-#include "find_letter_occurrences.hpp"
+#include "optimize-matrix.hpp"
+#include "states_correlation.hpp"
 
 int saveToJSON(std::string const& resultsMatrixStr, std::string const& fileName)
 {
@@ -28,18 +28,50 @@ int saveToJSON(std::string const& resultsMatrixStr, std::string const& fileName)
     return 0;
 }
 
+std::string loadFromJson(std::string const& fileName)
+{
+    std::string resultsStr;
+    std::ifstream saveMatrix {fileName};
+    if (saveMatrix.is_open())
+    {
+        saveMatrix >> resultsStr;
+        if (! saveMatrix.good())
+        {
+            std::cout << "Error Reading File";
+            return "";
+        }
+    }
+    else
+    {
+        std::cout << "Error Opening File";
+        return "";
+    }
+    return resultsStr;
+}
+
 int main()
 {
-    alteredstates::LetterOccurrences letter;
-    letter.findOccurrences();
-    std::string innerMatrix = letter.returnResultInner();
-    std::string outerMatrix = letter.returnResultOuter();
+    alteredstates::StatesCorrelation correlation {};
+    correlation.statesLetterCorrelation();
+    std::string statesCorrelationStr = correlation.buildStringFromArray();
+    std::string fileName             = "json/state-correlation.json";
 
-    alteredstates::Optimizer optimize(innerMatrix, outerMatrix);
-    optimize.maximizeScore();
-    std::string resultsMatrix = optimize.returnResultMatrix();
+    if (saveToJSON(statesCorrelationStr, fileName))
+    {
+        return 1;
+    }
 
-    std::string innerResultFile = "result/result-string.txt";
+    std::string defaultMatrix = loadFromJson("json/default-matrix-iter-4.json");
 
-    return saveToJSON(resultsMatrix, innerResultFile);
+    alteredstates::Optimizer optimizer(defaultMatrix);
+    optimizer.maximizeScore();
+    std::string resultsMatrix  = optimizer.returnResultMatrix();
+    std::string resultFileName = "result/result-string.txt";
+
+    if (saveToJSON(resultsMatrix, resultFileName))
+    {
+        return 1;
+    }
+
+    return 0;
 }

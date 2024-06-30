@@ -1,7 +1,7 @@
 // Copyright 2024 Andrew Drogalis
 // GNU License
-#ifndef FIND_BEST_RESULT_H
-#define FIND_BEST_RESULT_H
+#ifndef OPTIMIZE_MATRIX_H
+#define OPTIMIZE_MATRIX_H
 
 #include <string>
 #include <unordered_set>
@@ -13,7 +13,7 @@ struct Optimizer
 {
     Optimizer() = default;
 
-    Optimizer(std::string& innerMatrix, std::string& outerMatrix);
+    explicit Optimizer(std::string& defaultMatrix);
 
     [[nodiscard]] int calculateScore(int matrixSize, std::string const& resultsMatrixStr);
 
@@ -22,8 +22,7 @@ struct Optimizer
     [[nodiscard]] std::string returnResultMatrix() const noexcept;
 
     std::unordered_set<std::string_view> statesVisited;
-    std::string innerMatrix;
-    std::string outerMatrix;
+    std::string defaultMatrix;
     std::string resultMatrix;
 };
 

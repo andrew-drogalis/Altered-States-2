@@ -8,9 +8,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(GNUInstallDirs)
 
-add_executable(${PROJECT_NAME} altered-states-2.cpp
-    src/find_best_result.cpp
-    src/find_letter_occurrences.cpp)
+add_executable(${PROJECT_NAME} altered-states-2.cpp src/optimize-matrix.cpp
+                               src/states_correlation.cpp)
 
 target_include_directories(${PROJECT_NAME}
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
