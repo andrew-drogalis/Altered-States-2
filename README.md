@@ -46,33 +46,44 @@ Beyond that requirement, the local tourism authority has established awards for 
 #### Total Score
 
 ```txt
-Population: 202,802,988
+Population: 225,091,441
 ```
+
+#### Awards
+
+- 20S: visits at least 20 states
+- 200M: scores at least 200 million
 
 #### States Solution
 
 ```txt
-alabama
+wisconsin
+michigan
+louisiana
 newyork
-newjersey
+colorado
+ohio
+idaho
+arizona
+arkansas
+indiana
+oregon
+alaska
+alabama
 georgia
 nevada
-california
-michigan
-ohio
-oregon
-indiana
-idaho
-kansas
-illinois
+utah
 wyoming
 iowa
+montana
 florida
 virginia
 maine
+illinois
+kansas
+california
 texas
 ```
-
 
 ## License
 
