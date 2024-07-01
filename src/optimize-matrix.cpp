@@ -90,14 +90,11 @@ int Optimizer::calculateScore(int matrixSize, std::string const& resultsMatrixSt
     return totalScore;
 }
 
-void Optimizer::maximizeScore()
+void Optimizer::cycleLetterCombinations(
+    int totalLength, int& maxScore, std::unordered_set<std::string_view>& maxStatesVisited)
 {
-    int totalLength      = defaultMatrix.length();
     int const matrixSize = std::sqrt(totalLength);
     assert(totalLength == matrixSize * matrixSize);
-
-    int maxScore {};
-    std::unordered_set<std::string_view> maxStatesVisited;
     // Switch and / or Alter Two Positions
     for (int strIndex1 {}; strIndex1 < totalLength; ++strIndex1)
     {
@@ -133,6 +130,16 @@ void Optimizer::maximizeScore()
             }
         }
     }
+}
+
+void Optimizer::maximizeScore()
+{
+    int totalLength = defaultMatrix.length();
+
+    int maxScore {};
+    std::unordered_set<std::string_view> maxStatesVisited;
+    cycleLetterCombinations(totalLength, maxScore, maxStatesVisited);
+
     if (maxScore >= minThreshold)
     {
         std::cout << "Congratulations! Your Score of " << maxScore << " Passed!\n";
